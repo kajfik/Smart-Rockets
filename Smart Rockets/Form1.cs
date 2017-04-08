@@ -239,7 +239,7 @@ namespace Smart_Rockets
                 {
                     
                     //mutation
-                    if (rnd.Next(lifespan) < 2)
+                    if (rnd.Next(lifespan) < 3)
                     {
                         newGenes[i].X += GetRandomNumber(-mutationRange, mutationRange);
                         newGenes[i].Y += GetRandomNumber(-mutationRange, mutationRange);
