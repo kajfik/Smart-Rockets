@@ -20,6 +20,10 @@ namespace Smart_Rockets
             InitializeComponent();
         }
 
+
+        const int populationSize = 30000;
+        const double geneCreationRange = 0.3;
+        const double mutationRange = 0.05;
         static Bitmap bmp;
         static Graphics g;
         static Bitmap bmpGraph;
@@ -119,12 +123,11 @@ namespace Smart_Rockets
 
         class Population
         {
-            const int popSize = 30000;
             List<Rocket> rockets = new List<Rocket>();
 
             public Population(bool initDNA)
             {
-                for (int i = 0; i < popSize; i++)
+                for (int i = 0; i < populationSize; i++)
                 {
                     rockets.Add(new Rocket(initDNA));
                 }
@@ -134,7 +137,7 @@ namespace Smart_Rockets
 
             public void evaluate()
             {
-                for (int i = 0; i < popSize; i++)
+                for (int i = 0; i < populationSize; i++)
                 {
                     rockets[i].calcFitness();
                 }
@@ -148,12 +151,12 @@ namespace Smart_Rockets
 
                 graph.Add(rockets[0].timeActual);
                 double maxFitness = rockets[0].fitness;
-                for (int i = 0; i < popSize; i++)
+                for (int i = 0; i < populationSize; i++)
                 {
                     rockets[i].fitness /= maxFitness;
                 }
 
-                for (int i = 0; i < popSize; i++)
+                for (int i = 0; i < populationSize; i++)
                 {
                     int n = (int)(rockets[i].fitness * 100);
                     for (int j = 0; j < n; j++)
@@ -166,7 +169,7 @@ namespace Smart_Rockets
             public void selection()
             {
                 Population newPop = new Population(false);
-                for (int i = 0; i < popSize; i++)
+                for (int i = 0; i < populationSize; i++)
                 {
                     if (i < 50)
                     {
@@ -185,8 +188,8 @@ namespace Smart_Rockets
 
             public void run(int thread)
             {
-                int iBegin = popSize / numberOfWorkers * (thread + 1) - 1;
-                int iEnd = popSize / numberOfWorkers * thread;
+                int iBegin = populationSize / numberOfWorkers * (thread + 1) - 1;
+                int iEnd = populationSize / numberOfWorkers * thread;
                 for (int i = iBegin; i >= iEnd; i--)
                 {
                     rockets[i].update();
@@ -195,7 +198,7 @@ namespace Smart_Rockets
 
             public void run()
             {
-                for (int i = popSize - 1; i >= 0; i--)
+                for (int i = populationSize - 1; i >= 0; i--)
                 {
                     rockets[i].update();
                 }
@@ -216,14 +219,12 @@ namespace Smart_Rockets
         class DNA
         {
             public Vector[] genes = new Vector[lifespan];
-            static double range = 0.3;
-            static double mutationRange = 0.05;
 
             public DNA()
             {
                 for (int i = 0; i < lifespan; i++)
                 {
-                    genes[i] = new Vector(GetRandomNumber(-range, range), GetRandomNumber(-range, range));
+                    genes[i] = new Vector(GetRandomNumber(-geneCreationRange, geneCreationRange), GetRandomNumber(-geneCreationRange, geneCreationRange));
                 }
             }
 
@@ -237,24 +238,21 @@ namespace Smart_Rockets
                 Vector[] newGenes = new Vector[lifespan];
                 for (int i = 0; i < lifespan; i++)
                 {
-                    
+                    //crossover
+                    if (rnd.Next(2) == 1)
+                    {
+                        newGenes[i] = genes[i];
+                    }
+                    else
+                    {
+                        newGenes[i] = partner.genes[i];
+                    }
+
                     //mutation
-                    if (rnd.Next(lifespan) < 3)
+                    if (rnd.Next(lifespan) < 2)
                     {
                         newGenes[i].X += GetRandomNumber(-mutationRange, mutationRange);
                         newGenes[i].Y += GetRandomNumber(-mutationRange, mutationRange);
-                    }
-                    //crossover
-                    else
-                    {
-                        if (rnd.Next(2) == 1)
-                        {
-                            newGenes[i] = genes[i];
-                        }
-                        else
-                        {
-                            newGenes[i] = partner.genes[i];
-                        }
                     }
                 }
                 return new DNA(newGenes);
